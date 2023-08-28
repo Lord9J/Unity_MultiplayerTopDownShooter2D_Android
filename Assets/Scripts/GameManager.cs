@@ -5,28 +5,28 @@ using System;
 using TMPro;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using System.Linq;
 
 public class GameManager : MonoBehaviourPunCallbacks
 {
     public SpawnManager spawnManager;
+    public PlayerUI playerUI;
     public static GameManager instance;
 
     public TMP_Text TestText; // текст вывода информации
     public GameObject StartText; // текст вывода информации
     [SerializeField] private ScrollRect uiScrollRect; // авто-скролл консоли вниз
-
-
     public Dictionary<int, PlayerData> playerDataDictionary = new Dictionary<int, PlayerData>();
 
 
     private bool gameStarted = false;
+
 
     private void Awake()
     {
         if (instance == null) instance = this;
         else Destroy(gameObject);
         DontDestroyOnLoad(gameObject);
-
 
         Application.logMessageReceived += LogCallback; // для вывода дебагов в консоль
 
@@ -44,16 +44,30 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
     }
 
-    public void AddPlayerData(PlayerData playerData)
+
+    [PunRPC]
+    private void OnPlayerLost()
     {
-        Debug.Log("В словарь персонажей добавлен "+playerData.playerID);
-        playerDataDictionary.Add(playerData.playerID, playerData); // добавить данные персонажа в словарь 
+        int alivePlayersCount = playerDataDictionary.Count(kv => kv.Value.isAlive);
+
+        if (alivePlayersCount <= 1)
+        {
+            PlayerData winner = playerDataDictionary.Values.FirstOrDefault(data => data.isAlive);
+
+            if (winner != null)
+            {
+                // Отправьте сигнал о победе победителя всем остальным игрокам
+                photonView.RPC("OnPlayerWin", RpcTarget.All, winner.photonView.Owner.NickName, winner.coins);
+            }
+        }
     }
-    public void RemovePlayerData(PlayerData playerData)
+
+    [PunRPC]
+    private void OnPlayerWin(string winnerNickname, int winnerCoins)
     {
-        Debug.Log("Из словаря персонажей удален "+playerData.playerID);
-        playerDataDictionary.Remove(playerData.playerID); // убрать данные персонажа из словаря 
+       playerUI.ShowWinnerPanel(winnerNickname, winnerCoins);
     }
+
 
     private void AllPlayersReady()
     {

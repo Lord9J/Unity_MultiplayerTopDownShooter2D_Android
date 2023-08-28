@@ -31,6 +31,18 @@ public class PlayerUI : MonoBehaviour
         PlayerControlLChanger.ChangeJoyStickMode += ChangeJoyStickMode;
     }
 
+    public void ShowWinnerPanel(string winnerNickname, int winnerCoins)
+    {
+        Debug.Log(winnerNickname + " победил! Количество монет: " + winnerCoins);
+
+        finishCoinsText.text = winnerCoins.ToString();
+        playerNameText.text = winnerNickname; // Имя победителя
+
+        // Показать экран победы
+        FinishTable.SetActive(true);
+
+    }
+
     private void OnEventReceived(EventData eventData)
     {
         // if (eventData.Code == GameManager.EventCode_PlayerWin)

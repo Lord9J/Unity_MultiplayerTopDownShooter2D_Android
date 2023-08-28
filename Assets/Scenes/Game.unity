@@ -1128,6 +1128,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   spawnManager: {fileID: 2015830128}
+  playerUI: {fileID: 1020025278}
   TestText: {fileID: 2064583777}
   StartText: {fileID: 1240773105}
   uiScrollRect: {fileID: 2064583778}
@@ -2218,6 +2219,7 @@ GameObject:
   - component: {fileID: 1020025275}
   - component: {fileID: 1020025274}
   - component: {fileID: 1020025278}
+  - component: {fileID: 1020025279}
   m_Layer: 5
   m_Name: UI
   m_TagString: Untagged
@@ -2334,6 +2336,28 @@ MonoBehaviour:
   finishCoinsText: {fileID: 1109143379}
   playerNameText: {fileID: 704083550}
   FinishTable: {fileID: 928455282}
+--- !u!114 &1020025279
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1020025273}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  observableSearch: 2
+  ObservedComponents: []
+  sceneViewId: 2
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
 --- !u!1 &1021563902
 GameObject:
   m_ObjectHideFlags: 0

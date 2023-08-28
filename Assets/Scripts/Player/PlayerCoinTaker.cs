@@ -5,35 +5,38 @@ using Photon.Pun;
 
 public class PlayerCoinTaker : MonoBehaviourPunCallbacks
 {
+    private PlayerData playerData;
 
+    private void Start()
+    {
+        playerData = GetComponent<PlayerData>();
+    }
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.gameObject.tag == "Coin")
         {
-            photonView.RPC("CollectCoinRPC", RpcTarget.All, other.gameObject.GetPhotonView().ViewID);
+            CollectCoin(other.gameObject);
+            photonView.RPC("DestroyCoinRPC", RpcTarget.All, other.gameObject.name);
         }
     }
 
     [PunRPC]
-    private void CollectCoinRPC(int coinViewID)
+    private void DestroyCoinRPC(string coinName)
     {
-        PhotonView coinPhotonView = PhotonView.Find(coinViewID);
-        if (coinPhotonView != null)
+        // Найти объект монеты по имени и уничтожить его
+        GameObject coinToDestroy = GameObject.Find(coinName);
+        if (coinToDestroy != null)
         {
-            GameObject coin = coinPhotonView.gameObject;
-            CollectCoin(coin);
+            Destroy(coinToDestroy);
         }
     }
 
     private void CollectCoin(GameObject coin)
     {
-        PlayerData playerData = GetComponent<PlayerData>();
-
         if (playerData != null)
         {
             playerData.coins++;
             playerData.UpdateDataUI();
-            Destroy(coin.gameObject);
         }
     }
 

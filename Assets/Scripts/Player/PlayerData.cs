@@ -16,12 +16,11 @@ public class PlayerData : MonoBehaviourPunCallbacks, IPunObservable
     public static event Action<float> SetPlayerHealth;
     public static event Action<int> SetPlayerCoins;
 
-
     // Инициализация данных игрока
     public void InitializePlayerData()
     {
         playerID = gameObject.GetPhotonView().ViewID; // Устанавливаем ID
-        
+
         // Назначение случайного цвета
         Color randomColor = new Color(UnityEngine.Random.value, UnityEngine.Random.value, UnityEngine.Random.value);
         SpriteRenderer spriteRenderer = GetComponentInChildren<SpriteRenderer>();
@@ -29,30 +28,43 @@ public class PlayerData : MonoBehaviourPunCallbacks, IPunObservable
 
         currentHealth = maxHealth;
         coins = 0;
-        isAlive=true;
+        isAlive = true;
 
         UpdateDataUI();
     }
 
     public void UpdateDataUI()
     {
-        SetPlayerHealth?.Invoke(currentHealth);
-        SetPlayerCoins?.Invoke(coins);
+        if (isAlive)
+        {
+            SetPlayerHealth?.Invoke(currentHealth);
+            SetPlayerCoins?.Invoke(coins);
+        }
     }
 
     public void TakeDamage(int damage)
     {
-        Debug.Log(PhotonNetwork.NickName+" получил "+damage+" урона");
-
-        currentHealth -= damage;
-
-        if (currentHealth <= 0)
+        if (photonView.IsMine)
         {
-            Debug.Log(PhotonNetwork.NickName+" проиграл");
-            isAlive=false;
+            Debug.Log(PhotonNetwork.NickName + " получил " + damage + " урона");
+
+            currentHealth -= damage;
+            if (currentHealth <= 0)
+            {
+                isAlive = false;
+
+                // Уведомляем о проигрыше
+                GameManager.instance.photonView.RPC("OnPlayerLost", RpcTarget.All);
+
+                Debug.Log(this.photonView.Owner.NickName + " проиграл");
+
+                PhotonNetwork.Destroy(this.gameObject);
+            }
+            UpdateDataUI();
         }
-        UpdateDataUI();
     }
+
+    
 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
@@ -65,7 +77,7 @@ public class PlayerData : MonoBehaviourPunCallbacks, IPunObservable
         else // Получение данных
         {
             currentHealth = (int)stream.ReceiveNext();
-            coins = (int)stream.ReceiveNext();  
+            coins = (int)stream.ReceiveNext();
             isAlive = (bool)stream.ReceiveNext();
         }
     }
