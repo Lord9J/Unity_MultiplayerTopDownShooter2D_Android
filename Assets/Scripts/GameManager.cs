@@ -4,6 +4,7 @@ using Photon.Pun;
 using System;
 using TMPro;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 public class GameManager : MonoBehaviourPunCallbacks
 {
@@ -13,6 +14,10 @@ public class GameManager : MonoBehaviourPunCallbacks
     public TMP_Text TestText; // текст вывода информации
     public GameObject StartText; // текст вывода информации
     [SerializeField] private ScrollRect uiScrollRect; // авто-скролл консоли вниз
+
+
+    public Dictionary<int, PlayerData> playerDataDictionary = new Dictionary<int, PlayerData>();
+
 
     private bool gameStarted = false;
 
@@ -37,7 +42,17 @@ public class GameManager : MonoBehaviourPunCallbacks
             gameStarted = true;
             AllPlayersReady();
         }
+    }
 
+    public void AddPlayerData(PlayerData playerData)
+    {
+        Debug.Log("В словарь персонажей добавлен "+playerData.playerID);
+        playerDataDictionary.Add(playerData.playerID, playerData); // добавить данные персонажа в словарь 
+    }
+    public void RemovePlayerData(PlayerData playerData)
+    {
+        Debug.Log("Из словаря персонажей удален "+playerData.playerID);
+        playerDataDictionary.Remove(playerData.playerID); // убрать данные персонажа из словаря 
     }
 
     private void AllPlayersReady()
@@ -45,7 +60,6 @@ public class GameManager : MonoBehaviourPunCallbacks
         Debug.Log("Все игроки готовы, запускаю метод спавна RPC");
         spawnManager.photonView.RPC("StartGameRPC", RpcTarget.All);
     }
-
 
     public override void OnPlayerEnteredRoom(Photon.Realtime.Player newPlayer)
     {
@@ -56,7 +70,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     {
         Debug.Log("Игрок " + PlayerPrefs.GetString("PlayerNickname") + " покинул комнату.");
     }
-    
+
 
 
     private void LogCallback(string message, string stackTrace, LogType type)

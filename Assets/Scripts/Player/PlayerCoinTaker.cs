@@ -10,12 +10,10 @@ public class PlayerCoinTaker : MonoBehaviourPunCallbacks
     {
         if (other.gameObject.tag == "Coin")
         {
-            // CollectCoin(other.gameObject);
             photonView.RPC("CollectCoinRPC", RpcTarget.All, other.gameObject.GetPhotonView().ViewID);
-
         }
-
     }
+
     [PunRPC]
     private void CollectCoinRPC(int coinViewID)
     {
@@ -38,6 +36,24 @@ public class PlayerCoinTaker : MonoBehaviourPunCallbacks
             Destroy(coin.gameObject);
         }
     }
+
+    // if (photonView.IsMine)
+    //     {
+    //         if (other.gameObject.tag == "Coin")
+    //         {
+    //             PlayerData playerData;
+    //             if (GameManager.instance.playerDataDictionary.TryGetValue(photonView.ViewID, out playerData))
+    //             {
+    //                 playerData.coins++;
+    //                 playerData.UpdateDataUI();
+    //             }
+
+    //             if (photonView.IsMine)
+    //             {
+    //                 PhotonNetwork.Destroy(other.gameObject.gameObject);
+    //             }
+    //         }
+    //     }
 
     // private void CollectCoin(GameObject coin)
     // {

@@ -7,19 +7,24 @@ using Photon.Realtime;
 public class PlayerHitManager : MonoBehaviourPunCallbacks
 {
     public PlayerData playerData;
+
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.gameObject.CompareTag("Bullet"))
+        if (photonView.IsMine)
         {
-            Bullet bullet = other.GetComponent<Bullet>();
-
-            // Проверяем, не является ли текущий игрок владельцем пули
-            if (bullet.ownerViewID != photonView.ViewID)
+            if (other.gameObject.CompareTag("Bullet"))
             {
-                if (playerData != null)
+                Bullet bullet = other.GetComponent<Bullet>();
+
+                // Проверяем, не является ли текущий игрок владельцем пули
+                if (bullet.ownerViewID != photonView.ViewID)
                 {
-                    playerData.TakeDamage(bullet.damageAmount);
-                    playerData.UpdateDataUI();
+                    PlayerData damagedPlayerData;
+                    if (GameManager.instance.playerDataDictionary.TryGetValue(photonView.ViewID, out damagedPlayerData))
+                    {
+                        damagedPlayerData.TakeDamage(bullet.damageAmount);
+                        damagedPlayerData.UpdateDataUI();
+                    }
                 }
             }
         }

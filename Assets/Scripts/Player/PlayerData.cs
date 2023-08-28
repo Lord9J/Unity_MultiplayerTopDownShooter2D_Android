@@ -7,6 +7,7 @@ using Photon.Realtime;
 
 public class PlayerData : MonoBehaviourPunCallbacks, IPunObservable
 {
+    public int playerID; // Уникальный ID игрока
     public int maxHealth = 100;
     public int currentHealth;
     public int coins;
@@ -19,6 +20,8 @@ public class PlayerData : MonoBehaviourPunCallbacks, IPunObservable
     // Инициализация данных игрока
     public void InitializePlayerData()
     {
+        playerID = gameObject.GetPhotonView().ViewID; // Устанавливаем ID
+        
         // Назначение случайного цвета
         Color randomColor = new Color(UnityEngine.Random.value, UnityEngine.Random.value, UnityEngine.Random.value);
         SpriteRenderer spriteRenderer = GetComponentInChildren<SpriteRenderer>();
@@ -39,10 +42,13 @@ public class PlayerData : MonoBehaviourPunCallbacks, IPunObservable
 
     public void TakeDamage(int damage)
     {
+        Debug.Log(PhotonNetwork.NickName+" получил "+damage+" урона");
+
         currentHealth -= damage;
 
         if (currentHealth <= 0)
         {
+            Debug.Log(PhotonNetwork.NickName+" проиграл");
             isAlive=false;
         }
         UpdateDataUI();

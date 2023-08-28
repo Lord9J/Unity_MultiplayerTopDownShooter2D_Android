@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 public class SpawnManager : MonoBehaviourPunCallbacks
@@ -22,6 +20,8 @@ public class SpawnManager : MonoBehaviourPunCallbacks
     public float coinSpawnInterval = 5f; // Интервал создания монеты
     public float coinSpawnMargin = 1f; // Отступ от краев
     private int currentCoinCount = 0;
+
+
 
 
     [PunRPC]
@@ -48,6 +48,7 @@ public class SpawnManager : MonoBehaviourPunCallbacks
         if (playerData != null)
         {
             playerData.InitializePlayerData();
+            GameManager.instance.playerDataDictionary.Add(playerObject.GetPhotonView().ViewID, playerData); // Здесь сохраняем playerData в словарь по ViewID
 
         }
     }

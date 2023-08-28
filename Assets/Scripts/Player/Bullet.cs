@@ -22,11 +22,10 @@ public class Bullet : MonoBehaviour
         Destroy(gameObject);
     }
 
-
     private void OnTriggerEnter2D(Collider2D other)
     {
        
-        // Активируем анимацию эффекта вспышки
+        // Активируем анимацию эффекта вспышки при попадании в объект
         if (animator != null)
         {
             rb.velocity = new Vector2(0.0f, 0.0f);
