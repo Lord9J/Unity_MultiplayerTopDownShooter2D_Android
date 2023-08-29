@@ -27,8 +27,6 @@ public class SpawnManager : MonoBehaviourPunCallbacks
     [PunRPC]
     public void StartGameRPC()
     {
-        Debug.Log("StartGameRPC сработал, начинаю создание персонажей и запускаю генератор монет");
-
         GameManager.instance.StartText.SetActive(false);
         //Начинаем создавать монеты через определенные интервалы
         InvokeRepeating("SpawnCoin", 0f, coinSpawnInterval);

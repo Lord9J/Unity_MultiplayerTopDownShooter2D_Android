@@ -4,6 +4,7 @@ using UnityEngine;
 using System;
 using Photon.Pun;
 using Photon.Realtime;
+using Unity.VisualScripting;
 
 public class PlayerData : MonoBehaviourPunCallbacks, IPunObservable
 {
@@ -15,6 +16,7 @@ public class PlayerData : MonoBehaviourPunCallbacks, IPunObservable
 
     public static event Action<float> SetPlayerHealth;
     public static event Action<int> SetPlayerCoins;
+    public static event Action<bool> SendPlayerUIStatus;
 
     // Инициализация данных игрока
     public void InitializePlayerData()
@@ -30,43 +32,45 @@ public class PlayerData : MonoBehaviourPunCallbacks, IPunObservable
         coins = 0;
         isAlive = true;
 
+
+        GameManager.instance.SendPlayerUIStatus(true); // отправить сигнал на подписку
+
         UpdateDataUI();
     }
 
     public void UpdateDataUI()
     {
-        if (isAlive)
-        {
-            SetPlayerHealth?.Invoke(currentHealth);
-            SetPlayerCoins?.Invoke(coins);
-        }
+        SetPlayerHealth?.Invoke(currentHealth);
+        SetPlayerCoins?.Invoke(coins);
     }
 
     public void TakeDamage(int damage)
     {
         if (photonView.IsMine)
         {
-            Debug.Log(PhotonNetwork.NickName + " получил " + damage + " урона");
-
-            currentHealth -= damage;
-            if (currentHealth <= 0)
+            if (isAlive)
             {
-                isAlive = false;
+                currentHealth -= damage;
+                UpdateDataUI();
+                if (currentHealth <= 0) // поражение персонажа
+                {
+                    GameManager.instance.SendPlayerUIStatus(false); // отправить сигнал на подписку
 
-                // Уведомляем о проигрыше
-                GameManager.instance.photonView.RPC("OnPlayerLost", RpcTarget.All);
+                    isAlive = false;
 
-                Debug.Log(this.photonView.Owner.NickName + " проиграл");
+                    // Уведомляем о проигрыше
+                    GameManager.instance.photonView.RPC("OnPlayerLost", RpcTarget.All);
 
-                PhotonNetwork.Destroy(this.gameObject);
+                    Debug.Log(this.photonView.Owner.NickName + " проиграл");
+
+                    PhotonNetwork.Destroy(this.gameObject);
+                }
             }
-            UpdateDataUI();
+
         }
     }
 
-    
-
-    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info) // синронизация данных
     {
         if (stream.IsWriting) // Отправка данных
         {

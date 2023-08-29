@@ -37,11 +37,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 
         // Проверка для старта игры
         if (PhotonNetwork.CurrentRoom.PlayerCount > 1 && !gameStarted)
-        {
-            Debug.Log("Достигнуто требуемое количество игроков, начинаем игру.");
-            gameStarted = true;
             AllPlayersReady();
-        }
     }
 
 
@@ -65,14 +61,41 @@ public class GameManager : MonoBehaviourPunCallbacks
     [PunRPC]
     private void OnPlayerWin(string winnerNickname, int winnerCoins)
     {
-       playerUI.ShowWinnerPanel(winnerNickname, winnerCoins);
+        playerUI.ShowWinnerPanel(winnerNickname, winnerCoins);
     }
 
 
+    public void SendPlayerUIStatus(bool status)
+    {
+        playerUI.SendPlayerUIStatus(status);
+    }
+
     private void AllPlayersReady()
     {
-        Debug.Log("Все игроки готовы, запускаю метод спавна RPC");
+        Debug.Log("Достигнуто требуемое количество игроков, начинаем игру.");
         spawnManager.photonView.RPC("StartGameRPC", RpcTarget.All);
+    }
+
+    public void RestartGame()
+    {
+        photonView.RPC("RestartGameRPC", RpcTarget.All);
+    }
+
+    [PunRPC]
+    public void RestartGameRPC()
+    {
+        if (PhotonNetwork.IsMasterClient)
+        {
+            // Выйти из комнаты перед перезагрузкой сцены
+            PhotonNetwork.LeaveRoom();
+        }
+    }
+
+    // Метод, который будет вызван, когда игрок выйдет из комнаты
+    public override void OnLeftRoom()
+    {
+        // Переключить сцену после выхода всех игроков
+        PhotonNetwork.LoadLevel("Game");
     }
 
     public override void OnPlayerEnteredRoom(Photon.Realtime.Player newPlayer)

@@ -20,20 +20,41 @@ public class PlayerUI : MonoBehaviour
     public TMP_Text finishCoinsText;
     public TMP_Text playerNameText;
     public GameObject FinishTable;
+    public GameObject RestartBtn;
 
     public static event Action ChangePlayerControllerMode;
 
-    private void Start()
+    private void Awake()
     {
-        PlayerData.SetPlayerHealth += UpdateHealth;
-        PlayerData.SetPlayerCoins += UpdateCoins;
-
         PlayerControlLChanger.ChangeJoyStickMode += ChangeJoyStickMode;
+    }
+
+    public void SendPlayerUIStatus(bool status)
+    {
+        if (status)
+        {
+            Debug.Log(PhotonNetwork.NickName + " подписался на события");
+            // подписка на события из PlayerData
+            PlayerData.SetPlayerHealth += UpdateHealth;
+            PlayerData.SetPlayerCoins += UpdateCoins;
+        }
+        else
+        {
+            Debug.Log(PhotonNetwork.NickName + " отписался");
+            // отписка от событий
+            PlayerData.SetPlayerHealth -= UpdateHealth;
+            PlayerData.SetPlayerCoins -= UpdateCoins;
+        }
     }
 
     public void ShowWinnerPanel(string winnerNickname, int winnerCoins)
     {
         Debug.Log(winnerNickname + " победил! Количество монет: " + winnerCoins);
+
+        if (PhotonNetwork.IsMasterClient) // показать кнопку перезапуска мастеру клиенту
+        {
+            RestartBtn.SetActive(true);
+        }
 
         finishCoinsText.text = winnerCoins.ToString();
         playerNameText.text = winnerNickname; // Имя победителя
@@ -41,24 +62,6 @@ public class PlayerUI : MonoBehaviour
         // Показать экран победы
         FinishTable.SetActive(true);
 
-    }
-
-    private void OnEventReceived(EventData eventData)
-    {
-        // if (eventData.Code == GameManager.EventCode_PlayerWin)
-        // {
-        //     object[] content = (object[])eventData.CustomData;
-        //     int winnerViewID = (int)content[0];
-
-        //     if (GameManager.instance.GetPlayerData(winnerViewID) is PlayerData winnerPlayerData)
-        //     {
-        //         finishCoinsText.text = winnerPlayerData.coins.ToString();
-        //         playerNameText.text = winnerPlayerData.name; // Имя победителя
-
-        //         // Показать экран победы
-        //         FinishTable.SetActive(true);
-        //     }
-        // }
     }
 
     private void UpdateHealth(float hp)
@@ -75,12 +78,17 @@ public class PlayerUI : MonoBehaviour
         lookAndShootJoystick.SetActive(!mode);
         movementJoyStick.SetActive(!mode);
     }
-
     public void ChangeControllMode()
     {
         ChangePlayerControllerMode?.Invoke();
     }
 
+    public void RestartGameBtn()
+    {
+        GameManager.instance.RestartGame();
+    }
+
+    
     public void ExitGameBtn()
     {
         PhotonNetwork.LeaveRoom();
