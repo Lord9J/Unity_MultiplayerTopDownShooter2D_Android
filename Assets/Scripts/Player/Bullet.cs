@@ -30,6 +30,7 @@ public class Bullet : MonoBehaviour
         {
             rb.velocity = new Vector2(0.0f, 0.0f);
             animator.SetTrigger("StartEffect");
+            GetComponent<Collider2D>().enabled = false;
         }
         StartCoroutine(DestroyBulletTime(1f));
     }

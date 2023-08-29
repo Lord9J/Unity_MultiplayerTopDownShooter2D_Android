@@ -52,6 +52,11 @@ MonoBehaviour:
   - DestoryCoinRPC
   - DestroyCoinRPC
   - RestartGameRPC
+  - LoadMyScene
+  - GameReadyRPC
+  - HideStartGameTable
+  - IsGameStarted
+  - SetGameStartedBool
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1

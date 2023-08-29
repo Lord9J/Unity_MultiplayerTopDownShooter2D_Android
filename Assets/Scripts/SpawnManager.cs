@@ -27,7 +27,6 @@ public class SpawnManager : MonoBehaviourPunCallbacks
     [PunRPC]
     public void StartGameRPC()
     {
-        GameManager.instance.StartText.SetActive(false);
         //Начинаем создавать монеты через определенные интервалы
         InvokeRepeating("SpawnCoin", 0f, coinSpawnInterval);
 

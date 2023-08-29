@@ -20,27 +20,33 @@ public class PlayerUI : MonoBehaviour
     public TMP_Text finishCoinsText;
     public TMP_Text playerNameText;
     public GameObject FinishTable;
-    public GameObject RestartBtn;
 
+    [Header("Экран для начала игры")]
+    public GameObject StartGameTable;
+    public GameObject StartGameBtnObject;
+    public GameObject ExitGameBtnObject;
+    public TMP_Text StartText; // текст вывода информации
     public static event Action ChangePlayerControllerMode;
 
     private void Awake()
     {
         PlayerControlLChanger.ChangeJoyStickMode += ChangeJoyStickMode;
+
+        // Если это мастер, показать кнопку начала игры
+        if (PhotonNetwork.IsMasterClient) StartGameBtnObject.SetActive(true);
+        else StartGameBtnObject.SetActive(false);
     }
 
     public void SendPlayerUIStatus(bool status)
     {
         if (status)
         {
-            Debug.Log(PhotonNetwork.NickName + " подписался на события");
             // подписка на события из PlayerData
             PlayerData.SetPlayerHealth += UpdateHealth;
             PlayerData.SetPlayerCoins += UpdateCoins;
         }
         else
         {
-            Debug.Log(PhotonNetwork.NickName + " отписался");
             // отписка от событий
             PlayerData.SetPlayerHealth -= UpdateHealth;
             PlayerData.SetPlayerCoins -= UpdateCoins;
@@ -51,17 +57,23 @@ public class PlayerUI : MonoBehaviour
     {
         Debug.Log(winnerNickname + " победил! Количество монет: " + winnerCoins);
 
-        if (PhotonNetwork.IsMasterClient) // показать кнопку перезапуска мастеру клиенту
-        {
-            RestartBtn.SetActive(true);
-        }
 
         finishCoinsText.text = winnerCoins.ToString();
         playerNameText.text = winnerNickname; // Имя победителя
 
         // Показать экран победы
         FinishTable.SetActive(true);
+    }
 
+    public void ShowHideStartGameTable(bool status)
+    {
+        StartGameTable.SetActive(status);
+    }
+
+    public void IsGameStarted()
+    {
+        StartText.text = "Игра уже началась";
+        ExitGameBtnObject.SetActive(true);
     }
 
     private void UpdateHealth(float hp)
@@ -83,12 +95,14 @@ public class PlayerUI : MonoBehaviour
         ChangePlayerControllerMode?.Invoke();
     }
 
-    public void RestartGameBtn()
+    public void StartGameBtn()
     {
-        GameManager.instance.RestartGame();
+        if (!GameManager.instance.gameReady) StartText.text = "Недостаточно игроков для начала игры";
+        else
+            GameManager.instance.StartGame();
     }
 
-    
+
     public void ExitGameBtn()
     {
         PhotonNetwork.LeaveRoom();

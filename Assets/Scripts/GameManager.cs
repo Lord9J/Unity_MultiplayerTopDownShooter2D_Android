@@ -6,6 +6,7 @@ using TMPro;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviourPunCallbacks
 {
@@ -14,37 +15,64 @@ public class GameManager : MonoBehaviourPunCallbacks
     public static GameManager instance;
 
     public TMP_Text TestText; // текст вывода информации
-    public GameObject StartText; // текст вывода информации
     [SerializeField] private ScrollRect uiScrollRect; // авто-скролл консоли вниз
     public Dictionary<int, PlayerData> playerDataDictionary = new Dictionary<int, PlayerData>();
-
-
-    private bool gameStarted = false;
+    public bool gameReady = false;
+    public bool gameStarted = false;
 
 
     private void Awake()
     {
         if (instance == null) instance = this;
-        else Destroy(gameObject);
-        DontDestroyOnLoad(gameObject);
 
         Application.logMessageReceived += LogCallback; // для вывода дебагов в консоль
 
         // Получение никнейма игрока
         PhotonNetwork.NickName = PlayerPrefs.GetString("PlayerNickname");
+
         // Вывод сообщения о подключении игрока
         Debug.Log("Игрок: " + PhotonNetwork.NickName + " подключился");
 
+        if (!PhotonNetwork.IsMasterClient) // Если это не мастер
+            photonView.RPC("IsGameStarted", RpcTarget.MasterClient); // Спрашиваем у мастера, началась ли игра
+
         // Проверка для старта игры
-        if (PhotonNetwork.CurrentRoom.PlayerCount > 1 && !gameStarted)
-            AllPlayersReady();
+        if (PhotonNetwork.CurrentRoom.PlayerCount > 1 && !gameReady)
+        {
+            photonView.RPC("GameReadyRPC", RpcTarget.All); // Отправить всем сигнал, что собрано достаточно игроков
+        }
+
     }
+
+    [PunRPC]
+    private void GameReadyRPC()
+    {
+        gameReady = true;
+        playerUI.StartText.text = "Можно начать игру";
+    }
+
+    [PunRPC]
+    private void HideStartGameTable()
+    {
+        playerUI.ShowHideStartGameTable(false);
+    }
+
+    public void StartGame() // Метод запуска игры, запускает мастер клиент от PlayerUI кнопкой
+    {
+        gameStarted = true;
+        photonView.RPC("SetGameStartedBool", RpcTarget.All);
+        photonView.RPC("HideStartGameTable", RpcTarget.All);
+        spawnManager.photonView.RPC("StartGameRPC", RpcTarget.All);
+    }
+
 
 
     [PunRPC]
     private void OnPlayerLost()
     {
         int alivePlayersCount = playerDataDictionary.Count(kv => kv.Value.isAlive);
+
+        Debug.Log("Живых игроков =" + alivePlayersCount);
 
         if (alivePlayersCount <= 1)
         {
@@ -64,38 +92,9 @@ public class GameManager : MonoBehaviourPunCallbacks
         playerUI.ShowWinnerPanel(winnerNickname, winnerCoins);
     }
 
-
     public void SendPlayerUIStatus(bool status)
     {
         playerUI.SendPlayerUIStatus(status);
-    }
-
-    private void AllPlayersReady()
-    {
-        Debug.Log("Достигнуто требуемое количество игроков, начинаем игру.");
-        spawnManager.photonView.RPC("StartGameRPC", RpcTarget.All);
-    }
-
-    public void RestartGame()
-    {
-        photonView.RPC("RestartGameRPC", RpcTarget.All);
-    }
-
-    [PunRPC]
-    public void RestartGameRPC()
-    {
-        if (PhotonNetwork.IsMasterClient)
-        {
-            // Выйти из комнаты перед перезагрузкой сцены
-            PhotonNetwork.LeaveRoom();
-        }
-    }
-
-    // Метод, который будет вызван, когда игрок выйдет из комнаты
-    public override void OnLeftRoom()
-    {
-        // Переключить сцену после выхода всех игроков
-        PhotonNetwork.LoadLevel("Game");
     }
 
     public override void OnPlayerEnteredRoom(Photon.Realtime.Player newPlayer)
@@ -107,6 +106,29 @@ public class GameManager : MonoBehaviourPunCallbacks
     {
         Debug.Log("Игрок " + PlayerPrefs.GetString("PlayerNickname") + " покинул комнату.");
     }
+
+    [PunRPC] // Мастер получает это
+    public void IsGameStarted()
+    {
+        Debug.Log("Мастер получил и проверяет чему равен gameStarted = " + gameStarted);
+        if (gameStarted)
+            photonView.RPC("SetGameStartedBool", RpcTarget.All);
+    }
+    [PunRPC] // Мастер отправляет это всем
+    public void SetGameStartedBool()
+    {
+        if (!PhotonNetwork.IsMasterClient)
+        {
+            Debug.Log("Мастер отправил всем что игра началась");
+            gameStarted = true;
+
+            // Вывести меню начала игры что уже началась игра
+            playerUI.IsGameStarted();
+        }
+
+    }
+
+
 
 
 
