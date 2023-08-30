@@ -6406,11 +6406,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 6107182238674363685, guid: db9229b08705372498213595131b6652, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 0
+      value: -200
       objectReference: {fileID: 0}
     - target: {fileID: 6107182239327935362, guid: db9229b08705372498213595131b6652, type: 3}
       propertyPath: m_Name
       value: Scroll View
+      objectReference: {fileID: 0}
+    - target: {fileID: 6107182239327935362, guid: db9229b08705372498213595131b6652, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6107182239327935373, guid: db9229b08705372498213595131b6652, type: 3}
       propertyPath: m_Pivot.x
@@ -6498,11 +6502,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6107182239643417239, guid: db9229b08705372498213595131b6652, type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6107182239643417239, guid: db9229b08705372498213595131b6652, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: db9229b08705372498213595131b6652, type: 3}

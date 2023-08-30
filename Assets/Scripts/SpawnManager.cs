@@ -24,7 +24,7 @@ public class SpawnManager : MonoBehaviourPunCallbacks
 
 
 
-    [PunRPC]
+    [PunRPC]   // Метод вызываемый у всех, когда игра начниается
     public void StartGameRPC()
     {
         //Начинаем создавать монеты через определенные интервалы
@@ -34,38 +34,40 @@ public class SpawnManager : MonoBehaviourPunCallbacks
         SpawnPlayer();
     }
 
-
-
-    public void SpawnPlayer()
+    public void SpawnPlayer() // Создание персонажей игрока
     {
-        Vector2 spawnPosition = GetRandomSpawnPosition();
+        Vector2 spawnPosition = GetRandomSpawnPosition(); // получить случайные координаты
+
         GameObject playerObject = PhotonNetwork.Instantiate(playerPrefab.name, spawnPosition, Quaternion.identity);
 
-        PlayerData playerData = playerObject.GetComponent<PlayerData>();
+        PlayerData playerData = playerObject.GetComponent<PlayerData>(); // Инициалзиция данных персонажа
         if (playerData != null)
         {
             playerData.InitializePlayerData();
             GameManager.instance.playerDataDictionary.Add(playerObject.GetPhotonView().ViewID, playerData); // Здесь сохраняем playerData в словарь по ViewID
-
         }
     }
 
-    private void SpawnCoin()
+    private void SpawnCoin()  // Создание префаба монет
     {
-        // Проверяем, не превышено ли максимальное количество монет
-        if (currentCoinCount < maxCoinCount)
+        if (PhotonNetwork.IsMasterClient) // если это мастер
         {
-            Vector2 spawnPosition = GetRandomSpawnPosition();
+            // Проверяем, не превышено ли максимальное количество монет
+            if (currentCoinCount < maxCoinCount)
+            {
+                Vector2 spawnPosition = GetRandomSpawnPosition();
 
-            // Создаем монету в найденной позиции
-            PhotonNetwork.Instantiate(coinPrefab.name, spawnPosition, Quaternion.identity);
+                // Создаем монету в найденной позиции
+                PhotonNetwork.Instantiate(coinPrefab.name, spawnPosition, Quaternion.identity);
 
-            // Увеличиваем счетчик монет
-            currentCoinCount++;
+                // Увеличиваем счетчик монет
+                currentCoinCount++;
+            }
         }
     }
 
-    private Vector2 GetRandomSpawnPosition()
+
+    private Vector2 GetRandomSpawnPosition() // получение случайно координаты
     {
         Vector3 randomPosition;
         int attempts = 0;

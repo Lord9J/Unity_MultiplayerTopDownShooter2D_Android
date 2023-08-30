@@ -1,7 +1,6 @@
 using System.Collections;
 using UnityEngine;
 using Photon.Pun;
-using System;
 using TMPro;
 using UnityEngine.UI;
 using System.Collections.Generic;
@@ -44,14 +43,14 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     }
 
-    [PunRPC]
+    [PunRPC] // Метод, вызываемый у всех, если в комнате достаточно игроков
     private void GameReadyRPC()
     {
         gameReady = true;
         playerUI.StartText.text = "Можно начать игру";
     }
 
-    [PunRPC]
+    [PunRPC] // Спрятать стартовое окно
     private void HideStartGameTable()
     {
         playerUI.ShowHideStartGameTable(false);
@@ -60,6 +59,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     public void StartGame() // Метод запуска игры, запускает мастер клиент от PlayerUI кнопкой
     {
         gameStarted = true;
+
         photonView.RPC("SetGameStartedBool", RpcTarget.All);
         photonView.RPC("HideStartGameTable", RpcTarget.All);
         spawnManager.photonView.RPC("StartGameRPC", RpcTarget.All);
@@ -67,14 +67,14 @@ public class GameManager : MonoBehaviourPunCallbacks
 
 
 
-    [PunRPC]
+    [PunRPC] // Если кто из персонажей игроков проиграл
     private void OnPlayerLost()
     {
         int alivePlayersCount = playerDataDictionary.Count(kv => kv.Value.isAlive);
 
         Debug.Log("Живых игроков =" + alivePlayersCount);
 
-        if (alivePlayersCount <= 1)
+        if (alivePlayersCount <= 1) // Проверка на победителя, если остался один персонаж
         {
             PlayerData winner = playerDataDictionary.Values.FirstOrDefault(data => data.isAlive);
 
@@ -86,13 +86,13 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
     }
 
-    [PunRPC]
+    [PunRPC] // Метод для всех, что этот персонаж победил
     private void OnPlayerWin(string winnerNickname, int winnerCoins)
     {
         playerUI.ShowWinnerPanel(winnerNickname, winnerCoins);
     }
 
-    public void SendPlayerUIStatus(bool status)
+    public void SendPlayerUIStatus(bool status) 
     {
         playerUI.SendPlayerUIStatus(status);
     }
@@ -107,21 +107,40 @@ public class GameManager : MonoBehaviourPunCallbacks
         Debug.Log("Игрок " + PlayerPrefs.GetString("PlayerNickname") + " покинул комнату.");
     }
 
+    public void LeaveRoom()
+    {
+        if (PhotonNetwork.IsMasterClient)
+        {
+            photonView.RPC("ForceKickAll", RpcTarget.All);
+        }
+        else
+        {
+            PhotonNetwork.LeaveRoom();
+            SceneManager.LoadScene("Lobby");
+        }
+    }
+
+    [PunRPC] // Мастер получает это
+    public void ForceKickAll()
+    {
+        PhotonNetwork.LeaveRoom();
+        SceneManager.LoadScene("Lobby");
+    }
+
+
     [PunRPC] // Мастер получает это
     public void IsGameStarted()
     {
-        Debug.Log("Мастер получил и проверяет чему равен gameStarted = " + gameStarted);
-        if (gameStarted)
-            photonView.RPC("SetGameStartedBool", RpcTarget.All);
+        if (gameStarted) photonView.RPC("SetGameStartedBool", RpcTarget.All);
     }
+
+
     [PunRPC] // Мастер отправляет это всем
     public void SetGameStartedBool()
     {
         if (!PhotonNetwork.IsMasterClient)
         {
-            Debug.Log("Мастер отправил всем что игра началась");
             gameStarted = true;
-
             // Вывести меню начала игры что уже началась игра
             playerUI.IsGameStarted();
         }
@@ -131,7 +150,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 
 
 
-
+    // Для отладки
     private void LogCallback(string message, string stackTrace, LogType type)
     {
         TestText.text += $": {message} \n";

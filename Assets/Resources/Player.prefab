@@ -307,6 +307,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5bd586a7ccba9a40b00ff55562cc9c1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerID: 0
   maxHealth: 100
   currentHealth: 0
   coins: 0
@@ -674,7 +675,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6206619271296299422}
   m_LocalRotation: {x: -0, y: -0, z: 0.7072098, w: -0.70700383}
-  m_LocalPosition: {x: 0.2325, y: 0, z: 0}
+  m_LocalPosition: {x: 0.247, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

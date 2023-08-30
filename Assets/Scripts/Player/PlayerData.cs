@@ -1,22 +1,21 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using System;
 using Photon.Pun;
-using Photon.Realtime;
-using Unity.VisualScripting;
 
 public class PlayerData : MonoBehaviourPunCallbacks, IPunObservable
 {
     public int playerID; // Уникальный ID игрока
-    public int maxHealth = 100;
-    public int currentHealth;
-    public int coins;
-    public bool isAlive;
+    public int maxHealth = 100; // маскимальное возможное здоровье 
+    public int currentHealth; // текущиее здоровье 
+    public int coins; // текущее количество монет
+    public bool isAlive; // жив ли этот персонаж
 
+
+    // События для обновления интерфейса
     public static event Action<float> SetPlayerHealth;
     public static event Action<int> SetPlayerCoins;
     public static event Action<bool> SendPlayerUIStatus;
+
 
     // Инициализация данных игрока
     public void InitializePlayerData()
@@ -32,26 +31,26 @@ public class PlayerData : MonoBehaviourPunCallbacks, IPunObservable
         coins = 0;
         isAlive = true;
 
-
         GameManager.instance.SendPlayerUIStatus(true); // отправить сигнал на подписку
 
-        UpdateDataUI();
+        UpdateDataUI(); 
     }
 
-    public void UpdateDataUI()
+    public void UpdateDataUI() // Обновить параметры интерфейса
     {
         SetPlayerHealth?.Invoke(currentHealth);
         SetPlayerCoins?.Invoke(coins);
     }
 
-    public void TakeDamage(int damage)
+    public void TakeDamage(int damage) // Персонаж получил урон
     {
         if (photonView.IsMine)
         {
-            if (isAlive)
+            if (isAlive) 
             {
                 currentHealth -= damage;
                 UpdateDataUI();
+                
                 if (currentHealth <= 0) // поражение персонажа
                 {
                     GameManager.instance.SendPlayerUIStatus(false); // отправить сигнал на подписку

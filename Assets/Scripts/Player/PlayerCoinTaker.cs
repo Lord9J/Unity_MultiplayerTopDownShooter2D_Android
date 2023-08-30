@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 
@@ -11,62 +9,40 @@ public class PlayerCoinTaker : MonoBehaviourPunCallbacks
     {
         playerData = GetComponent<PlayerData>();
     }
+    
+    // Если игрок столкунлся с объектом
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.gameObject.tag == "Coin")
+        if (other.gameObject.tag == "Coin") // проверить объект на монету
         {
-            CollectCoin(other.gameObject);
-            photonView.RPC("DestroyCoinRPC", RpcTarget.All, other.gameObject.name);
+            if (playerData != null)
+            {
+                playerData.coins++;
+                playerData.UpdateDataUI();
+                other.GetComponent<Collider2D>().enabled = false;
+            }
+
+            PhotonView coinView = other.gameObject.GetPhotonView();
+
+            if (coinView.IsMine) // Вызов метода на уничтожение монеты
+            {
+                photonView.RPC("DestroyCoinRPC", RpcTarget.All, coinView.ViewID);
+            }
         }
     }
+
 
     [PunRPC]
-    private void DestroyCoinRPC(string coinName)
+    private void DestroyCoinRPC(int coinViewID) // метод уничтожения монеты
     {
-        // Найти объект монеты по имени и уничтожить его
-        GameObject coinToDestroy = GameObject.Find(coinName);
-        if (coinToDestroy != null)
+        if (PhotonNetwork.IsMasterClient)
         {
-            Destroy(coinToDestroy);
+            GameObject coinObject = PhotonView.Find(coinViewID)?.gameObject;
+            if (coinObject != null)
+            {
+                PhotonNetwork.Destroy(coinObject);
+            }
         }
     }
 
-    private void CollectCoin(GameObject coin)
-    {
-        if (playerData != null)
-        {
-            playerData.coins++;
-            playerData.UpdateDataUI();
-        }
-    }
-
-    // if (photonView.IsMine)
-    //     {
-    //         if (other.gameObject.tag == "Coin")
-    //         {
-    //             PlayerData playerData;
-    //             if (GameManager.instance.playerDataDictionary.TryGetValue(photonView.ViewID, out playerData))
-    //             {
-    //                 playerData.coins++;
-    //                 playerData.UpdateDataUI();
-    //             }
-
-    //             if (photonView.IsMine)
-    //             {
-    //                 PhotonNetwork.Destroy(other.gameObject.gameObject);
-    //             }
-    //         }
-    //     }
-
-    // private void CollectCoin(GameObject coin)
-    // {
-    //     PlayerData playerData = GetComponent<PlayerData>(); // Получаем компонент PlayerData
-
-    //     if (playerData != null)
-    //     {
-    //         playerData.coins++;
-    //         playerData.UpdateDataUI();
-    //         PhotonNetwork.Destroy(coin.gameObject);
-    //     }
-    // }
 }

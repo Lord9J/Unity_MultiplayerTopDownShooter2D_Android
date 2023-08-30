@@ -16,8 +16,8 @@ public class PlayerHitManager : MonoBehaviourPunCallbacks
             {
                 Bullet bullet = other.GetComponent<Bullet>();
 
-                // Проверяем, не является ли текущий игрок владельцем пули
-                if (bullet.ownerViewID != photonView.ViewID)
+                // Проверяем, не является ли текущий игрок владельцем пули и может ли пуля поранить
+                if (bullet.ownerViewID != photonView.ViewID )
                 {
                     PlayerData damagedPlayerData;
                     if (GameManager.instance.playerDataDictionary.TryGetValue(photonView.ViewID, out damagedPlayerData))
@@ -31,23 +31,4 @@ public class PlayerHitManager : MonoBehaviourPunCallbacks
     }
 
 
-
-    // private void OnTriggerEnter2D(Collider2D other)
-    // {
-    //     // if (other.gameObject.CompareTag("Bullet"))
-    //     // {
-    //     //     Bullet bullet = other.GetComponent<Bullet>();
-
-    //     //     // Проверяем, не является ли текущий игрок владельцем пули
-    //     //     if (bullet.ownerViewID != photonView.ViewID)
-    //     //     {
-    //     //         PlayerData playerData = GameManager.instance.GetPlayerData(photonView.ViewID);
-    //     //         if (playerData != null)
-    //     //         {
-    //     //             playerData.TakeDamage(bullet.damageAmount);
-    //     //             playerData.UpdateDataUI();
-    //     //         }
-    //     //     }
-    //     // }
-    // }
 }

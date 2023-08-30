@@ -30,14 +30,14 @@ public class PlayerUI : MonoBehaviour
 
     private void Awake()
     {
-        PlayerControlLChanger.ChangeJoyStickMode += ChangeJoyStickMode;
+        PlayerControlLChanger.ChangeJoyStickMode += ChangeJoyStickMode; // подписка на событие по изменению типа управления
 
         // Если это мастер, показать кнопку начала игры
         if (PhotonNetwork.IsMasterClient) StartGameBtnObject.SetActive(true);
         else StartGameBtnObject.SetActive(false);
     }
 
-    public void SendPlayerUIStatus(bool status)
+    public void SendPlayerUIStatus(bool status) // подписка или отписка от событий
     {
         if (status)
         {
@@ -53,60 +53,57 @@ public class PlayerUI : MonoBehaviour
         }
     }
 
-    public void ShowWinnerPanel(string winnerNickname, int winnerCoins)
+    public void ShowWinnerPanel(string winnerNickname, int winnerCoins) // Показать экран победы с информацией
     {
         Debug.Log(winnerNickname + " победил! Количество монет: " + winnerCoins);
 
-
-        finishCoinsText.text = winnerCoins.ToString();
+        finishCoinsText.text = winnerCoins.ToString(); // Количество монет победителя
         playerNameText.text = winnerNickname; // Имя победителя
 
         // Показать экран победы
         FinishTable.SetActive(true);
     }
 
-    public void ShowHideStartGameTable(bool status)
+    public void ShowHideStartGameTable(bool status) // Скрыть окно старта игры
     {
         StartGameTable.SetActive(status);
     }
 
-    public void IsGameStarted()
+    public void IsGameStarted() // Метод для нового игрока, если игра уже началась
     {
         StartText.text = "Игра уже началась";
         ExitGameBtnObject.SetActive(true);
     }
 
-    private void UpdateHealth(float hp)
+    private void UpdateHealth(float hp) // Изменить количество здоровья на экране
     {
         healthSlider.value = hp;
     }
-    private void UpdateCoins(int coins)
+    private void UpdateCoins(int coins) // Изменить количество монет на экране
     {
         coinsText.text = coins.ToString();
     }
 
-    private void ChangeJoyStickMode(bool mode)
+    private void ChangeJoyStickMode(bool mode) // Изменить режим управления ( показать\скрыть джойстики)
     {
         lookAndShootJoystick.SetActive(!mode);
         movementJoyStick.SetActive(!mode);
     }
-    public void ChangeControllMode()
+    public void ChangeControllMode() // Если игрок нажал на кнопку "Изменить режим управления"
     {
         ChangePlayerControllerMode?.Invoke();
     }
 
-    public void StartGameBtn()
+    public void StartGameBtn() // Кнопка мастера, чтобы начать игру
     {
         if (!GameManager.instance.gameReady) StartText.text = "Недостаточно игроков для начала игры";
         else
             GameManager.instance.StartGame();
     }
 
-
-    public void ExitGameBtn()
+    public void ExitGameBtn() // Кнопка выхода из игры
     {
-        PhotonNetwork.LeaveRoom();
-        SceneManager.LoadScene("Lobby");
+      GameManager.instance.LeaveRoom();
     }
 
 }
